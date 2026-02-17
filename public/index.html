@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apple Shop</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1>&#63743; Apple Shop</h1>
+      <button id="cart-btn" class="cart-btn">
+        Cart (<span id="cart-count">0</span>)
+      </button>
+    </div>
+  </header>
+
+  <nav id="categories" class="categories"></nav>
+
+  <main id="products" class="products"></main>
+
+  <aside id="cart-panel" class="cart-panel hidden">
+    <div class="cart-header">
+      <h2>Your Cart</h2>
+      <button id="close-cart" class="close-btn">&times;</button>
+    </div>
+    <div id="cart-items" class="cart-items"></div>
+    <div class="cart-footer">
+      <div class="cart-total">Total: $<span id="cart-total">0.00</span></div>
+      <button id="checkout-btn" class="checkout-btn" disabled>Checkout</button>
+    </div>
+    <div id="checkout-form" class="checkout-form hidden">
+      <h3>Your Details</h3>
+      <input type="text" id="cust-name" placeholder="Full Name" required>
+      <input type="email" id="cust-email" placeholder="Email" required>
+      <button id="place-order-btn" class="place-order-btn">Place Order</button>
+    </div>
+    <div id="order-success" class="order-success hidden"></div>
+  </aside>
+
+  <div id="overlay" class="overlay hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
