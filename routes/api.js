@@ -4,15 +4,15 @@ const db = require('../db');
 
 const router = express.Router();
 
-// Get all products (optional ?category=iPhone filter)
-router.get('/products', (req, res) => {
-  const { category } = req.query;
-  let products;
-  if (category) {
-    products = db.prepare('SELECT * FROM products WHERE category = ?').all(category);
-  } else {
-    products = db.prepare('SELECT * FROM products').all();
-  }
+const PAWAPAY_API = process.env.PAWAPAY_API || 'https://api.sandbox.pawapay.io';
+const PAWAPAY_TOKEN = process.env.PAWAPAY_TOKEN || '';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+
+// --- Public routes ---
+
+// Get all products
+router.get('/products', (_req, res) => {
+  const products = db.prepare('SELECT * FROM products').all();
   res.json({ success: true, data: products });
 });
 
@@ -25,83 +25,87 @@ router.get('/products/:id', (req, res) => {
   res.json({ success: true, data: product });
 });
 
-// Get categories
-router.get('/categories', (_req, res) => {
-  const rows = db.prepare('SELECT DISTINCT category FROM products ORDER BY category').all();
-  res.json({ success: true, data: rows.map(r => r.category) });
-});
+// Create PawaPay payment session
+router.post('/pay', async (req, res) => {
+  const { productId } = req.body;
+  if (!productId) {
+    return res.status(400).json({ success: false, error: 'productId is required' });
+  }
 
-// Place order
-router.post('/orders', (req, res) => {
-  const { customerName, customerEmail, items } = req.body;
+  const product = db.prepare('SELECT * FROM products WHERE id = ?').get(productId);
+  if (!product) {
+    return res.status(404).json({ success: false, error: 'Product not found' });
+  }
 
-  if (!customerName || !customerEmail || !items || !items.length) {
-    return res.status(400).json({
-      success: false,
-      error: 'customerName, customerEmail, and items are required',
+  const depositId = uuidv4();
+
+  // Store payment record
+  db.prepare(
+    'INSERT INTO payments (depositId, productId, amount, status, createdAt) VALUES (?, ?, ?, ?, ?)'
+  ).run(depositId, product.id, product.price, 'pending', new Date().toISOString());
+
+  try {
+    const response = await fetch(`${PAWAPAY_API}/v2/paymentpage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${PAWAPAY_TOKEN}`,
+      },
+      body: JSON.stringify({
+        depositId,
+        returnUrl: `${BASE_URL}/return.html`,
+        amount: String(product.price),
+        country: 'ZMB',
+        reason: `Purchase: ${product.name}`,
+      }),
     });
-  }
 
-  // Validate items and calculate total
-  let total = 0;
-  const resolvedItems = [];
+    const data = await response.json();
 
-  for (const item of items) {
-    const product = db.prepare('SELECT * FROM products WHERE id = ?').get(item.productId);
-    if (!product) {
-      return res.status(400).json({
-        success: false,
-        error: `Product ID ${item.productId} not found`,
-      });
+    if (data.redirectUrl) {
+      res.json({ success: true, redirectUrl: data.redirectUrl });
+    } else {
+      res.status(502).json({ success: false, error: 'Failed to create payment session', details: data });
     }
-    const qty = item.quantity || 1;
-    total += product.price * qty;
-    resolvedItems.push({ productId: product.id, quantity: qty, price: product.price });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Payment service unavailable' });
   }
-
-  const insertOrder = db.prepare(
-    'INSERT INTO orders (customerName, customerEmail, total, createdAt) VALUES (?, ?, ?, ?)'
-  );
-  const insertItem = db.prepare(
-    'INSERT INTO order_items (orderId, productId, quantity, price) VALUES (?, ?, ?, ?)'
-  );
-
-  const placeOrder = db.transaction(() => {
-    const result = insertOrder.run(customerName, customerEmail, total, new Date().toISOString());
-    const orderId = result.lastInsertRowid;
-    for (const ri of resolvedItems) {
-      insertItem.run(orderId, ri.productId, ri.quantity, ri.price);
-    }
-    return orderId;
-  });
-
-  const orderId = placeOrder();
-
-  res.json({
-    success: true,
-    data: { orderId, total, itemCount: resolvedItems.length },
-  });
 });
 
-// Get orders
-router.get('/orders', (_req, res) => {
-  const orders = db.prepare('SELECT * FROM orders ORDER BY id DESC').all();
-  res.json({ success: true, data: orders });
+// --- Admin routes ---
+
+// Add a new product
+router.post('/products', (req, res) => {
+  const { name, price, image, description } = req.body;
+  if (!name || !price) {
+    return res.status(400).json({ success: false, error: 'name and price are required' });
+  }
+
+  const result = db.prepare(
+    'INSERT INTO products (name, price, image, description) VALUES (?, ?, ?, ?)'
+  ).run(name, price, image || '', description || '');
+
+  res.json({ success: true, data: { id: result.lastInsertRowid } });
 });
 
-// Get order detail
-router.get('/orders/:id', (req, res) => {
-  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
-  if (!order) {
-    return res.status(404).json({ success: false, error: 'Order not found' });
+// Delete a product
+router.delete('/products/:id', (req, res) => {
+  const result = db.prepare('DELETE FROM products WHERE id = ?').run(req.params.id);
+  if (result.changes === 0) {
+    return res.status(404).json({ success: false, error: 'Product not found' });
   }
-  const items = db.prepare(`
-    SELECT oi.*, p.name, p.category
-    FROM order_items oi
-    JOIN products p ON p.id = oi.productId
-    WHERE oi.orderId = ?
-  `).all(req.params.id);
-  res.json({ success: true, data: { ...order, items } });
+  res.json({ success: true });
+});
+
+// Get all payments (admin)
+router.get('/payments', (_req, res) => {
+  const payments = db.prepare(`
+    SELECT p.*, pr.name as productName
+    FROM payments p
+    LEFT JOIN products pr ON pr.id = p.productId
+    ORDER BY p.id DESC
+  `).all();
+  res.json({ success: true, data: payments });
 });
 
 module.exports = router;

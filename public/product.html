@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iPhone Zambia</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="/" class="logo">iPhone Zambia</a>
+    </div>
+  </header>
+
+  <main id="product-detail" class="product-detail">
+    <p>Loading...</p>
+  </main>
+
+  <script>
+    function esc(str) {
+      const el = document.createElement('span');
+      el.textContent = str;
+      return el.innerHTML;
+    }
+
+    async function loadProduct() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) {
+        document.getElementById('product-detail').innerHTML = '<p>Product not found.</p>';
+        return;
+      }
+
+      const res = await fetch(`/api/products/${id}`);
+      const { success, data: product, error } = await res.json();
+
+      if (!success) {
+        document.getElementById('product-detail').innerHTML = `<p>${esc(error)}</p>`;
+        return;
+      }
+
+      document.title = `${product.name} — iPhone Zambia`;
+
+      document.getElementById('product-detail').innerHTML = `
+        <div class="detail-card">
+          <img src="${esc(product.image)}" alt="${esc(product.name)}" onerror="this.style.display='none'">
+          <div class="detail-info">
+            <h1>${esc(product.name)}</h1>
+            <p class="detail-desc">${esc(product.description)}</p>
+            <div class="detail-price">ZMW ${Number(product.price).toLocaleString()}</div>
+            <button id="buy-btn" class="buy-btn">Buy Now</button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('buy-btn').onclick = async () => {
+        const btn = document.getElementById('buy-btn');
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+
+        try {
+          const payRes = await fetch('/api/pay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: product.id }),
+          });
+          const payData = await payRes.json();
+
+          if (payData.success && payData.redirectUrl) {
+            window.location.href = payData.redirectUrl;
+          } else {
+            alert(payData.error || 'Payment failed. Please try again.');
+            btn.disabled = false;
+            btn.textContent = 'Buy Now';
+          }
+        } catch {
+          alert('Could not connect to payment service. Please try again.');
+          btn.disabled = false;
+          btn.textContent = 'Buy Now';
+        }
+      };
+    }
+
+    loadProduct();
+  </script>
+</body>
+</html>

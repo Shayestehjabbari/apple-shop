@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — iPhone Zambia</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="/" class="logo">iPhone Zambia</a>
+      <span class="admin-badge">Admin</span>
+    </div>
+  </header>
+
+  <main class="admin-container">
+    <section class="admin-section">
+      <h2>Add Product</h2>
+      <form id="add-form" class="add-form">
+        <input type="text" id="p-name" placeholder="Product name" required>
+        <input type="number" id="p-price" placeholder="Price (ZMW)" step="0.01" required>
+        <input type="url" id="p-image" placeholder="Image URL">
+        <textarea id="p-desc" placeholder="Description" rows="2"></textarea>
+        <button type="submit" class="btn-primary">Add Product</button>
+      </form>
+    </section>
+
+    <section class="admin-section">
+      <h2>Products</h2>
+      <div id="products-list"></div>
+    </section>
+
+    <section class="admin-section">
+      <h2>Transactions</h2>
+      <div id="payments-list"></div>
+    </section>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>

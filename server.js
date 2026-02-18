@@ -10,5 +10,5 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api', apiRoutes);
 
 app.listen(PORT, () => {
-  console.log(`Apple Shop running on http://localhost:${PORT}`);
+  console.log(`iPhone Zambia Shop running on http://localhost:${PORT}`);
 });
