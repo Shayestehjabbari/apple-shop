@@ -45,7 +45,7 @@ router.post('/pay', async (req, res) => {
   ).run(depositId, product.id, product.price, 'pending', new Date().toISOString());
 
   try {
-    const response = await fetch(`${PAWAPAY_API}/v2/paymentpage`, {
+    const response = await fetch('https://sandbox.paywith.pawapay.io/api/v1/sessions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -53,8 +53,8 @@ router.post('/pay', async (req, res) => {
       },
       body: JSON.stringify({
         depositId,
-        returnUrl: `${BASE_URL}/return.html`,
-        amount: String(product.price),
+        returnUrl: `${BASE_URL}/index.html`,
+        amount: Number(product.price).toFixed(2),
         country: 'ZMB',
         reason: `Purchase: ${product.name}`,
       }),
@@ -69,6 +69,57 @@ router.post('/pay', async (req, res) => {
     }
   } catch (err) {
     res.status(500).json({ success: false, error: 'Payment service unavailable' });
+  }
+});
+
+// PawaPay deposit callback (webhook)
+router.post('/callback/deposit', (req, res) => {
+  const { depositId, status } = req.body;
+  if (!depositId || !status) {
+    return res.status(400).json({ success: false, error: 'Invalid callback payload' });
+  }
+
+  const statusMap = {
+    COMPLETED: 'completed',
+    FAILED: 'failed',
+    ACCEPTED: 'pending',
+    PROCESSING: 'pending',
+    IN_RECONCILIATION: 'pending',
+  };
+
+  const mappedStatus = statusMap[status] || 'pending';
+  db.prepare('UPDATE payments SET status = ? WHERE depositId = ?').run(mappedStatus, depositId);
+
+  res.json({ success: true });
+});
+
+// Check deposit status from PawaPay
+router.get('/payments/:depositId/status', async (req, res) => {
+  const { depositId } = req.params;
+
+  try {
+    const response = await fetch(`${PAWAPAY_API}/v2/deposits/${depositId}`, {
+      headers: { 'Authorization': `Bearer ${PAWAPAY_TOKEN}` },
+    });
+    const data = await response.json();
+
+    if (data.status === 'FOUND' && data.data) {
+      const statusMap = {
+        COMPLETED: 'completed',
+        FAILED: 'failed',
+        ACCEPTED: 'pending',
+        PROCESSING: 'pending',
+        IN_RECONCILIATION: 'pending',
+      };
+      const mappedStatus = statusMap[data.data.status] || 'pending';
+      db.prepare('UPDATE payments SET status = ? WHERE depositId = ?').run(mappedStatus, depositId);
+
+      res.json({ success: true, status: mappedStatus, pawapayStatus: data.data.status });
+    } else {
+      res.status(404).json({ success: false, error: 'Deposit not found' });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Could not check payment status' });
   }
 });
 
