@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — iPhone Zambia</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="/" class="logo">iPhone Zambia</a>
+    </div>
+  </header>
+
+  <main class="checkout-page">
+    <div id="checkout-content">
+      <p>Loading...</p>
+    </div>
+  </main>
+
+  <script>
+    function esc(str) {
+      const el = document.createElement('span');
+      el.textContent = str;
+      return el.innerHTML;
+    }
+
+    async function loadCheckout() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) {
+        document.getElementById('checkout-content').innerHTML = '<p>Product not found.</p>';
+        return;
+      }
+
+      const res = await fetch(`/api/products/${id}`);
+      const { success, data: product, error } = await res.json();
+
+      if (!success) {
+        document.getElementById('checkout-content').innerHTML = `<p>${esc(error)}</p>`;
+        return;
+      }
+
+      document.title = `Checkout: ${product.name} — iPhone Zambia`;
+
+      document.getElementById('checkout-content').innerHTML = `
+        <div class="checkout-card">
+          <div class="checkout-summary">
+            <img src="${esc(product.image)}" alt="${esc(product.name)}" onerror="this.style.display='none'">
+            <div>
+              <h2>${esc(product.name)}</h2>
+              <div class="checkout-price">ZMW ${Number(product.price).toLocaleString()}</div>
+            </div>
+          </div>
+
+          <form id="checkout-form">
+            <h3>Your Details</h3>
+            <label>
+              Full Name
+              <input type="text" id="c-name" required placeholder="John Banda">
+            </label>
+            <label>
+              Phone Number
+              <input type="tel" id="c-phone" required placeholder="0971234567">
+            </label>
+            <label>
+              Email Address
+              <input type="email" id="c-email" required placeholder="john@example.com">
+            </label>
+            <label>
+              Address
+              <input type="text" id="c-address" required placeholder="123 Cairo Road">
+            </label>
+            <label>
+              City
+              <input type="text" id="c-city" required placeholder="Lusaka">
+            </label>
+            <button type="submit" id="pay-btn" class="buy-btn">Proceed to Payment</button>
+          </form>
+        </div>
+      `;
+
+      document.getElementById('checkout-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('pay-btn');
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+
+        const customer = {
+          name: document.getElementById('c-name').value.trim(),
+          phone: document.getElementById('c-phone').value.trim(),
+          email: document.getElementById('c-email').value.trim(),
+          address: document.getElementById('c-address').value.trim(),
+          city: document.getElementById('c-city').value.trim(),
+        };
+
+        try {
+          const payRes = await fetch('/api/pay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: product.id, customer }),
+          });
+          const payData = await payRes.json();
+
+          if (payData.success && payData.redirectUrl) {
+            window.location.href = payData.redirectUrl;
+          } else {
+            alert(payData.error || 'Payment failed. Please try again.');
+            btn.disabled = false;
+            btn.textContent = 'Proceed to Payment';
+          }
+        } catch {
+          alert('Could not connect to payment service. Please try again.');
+          btn.disabled = false;
+          btn.textContent = 'Proceed to Payment';
+        }
+      };
+    }
+
+    loadCheckout();
+  </script>
+</body>
+</html>

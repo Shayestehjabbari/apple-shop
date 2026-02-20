@@ -38,9 +38,13 @@ router.get('/products/:id', (req, res) => {
 
 // Create PawaPay payment session
 router.post('/pay', async (req, res) => {
-  const { productId } = req.body;
+  const { productId, customer } = req.body;
   if (!productId) {
     return res.status(400).json({ success: false, error: 'productId is required' });
+  }
+
+  if (!customer || !customer.name || !customer.phone || !customer.email || !customer.address || !customer.city) {
+    return res.status(400).json({ success: false, error: 'All customer fields are required (name, phone, email, address, city)' });
   }
 
   const product = db.prepare('SELECT * FROM products WHERE id = ?').get(productId);
@@ -50,10 +54,10 @@ router.post('/pay', async (req, res) => {
 
   const depositId = uuidv4();
 
-  // Store payment record
+  // Store payment record with customer data
   db.prepare(
-    'INSERT INTO payments (depositId, productId, amount, status, createdAt) VALUES (?, ?, ?, ?, ?)'
-  ).run(depositId, product.id, product.price, 'pending', new Date().toISOString());
+    'INSERT INTO payments (depositId, productId, amount, status, createdAt, customerName, customerPhone, customerEmail, customerAddress, customerCity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  ).run(depositId, product.id, product.price, 'pending', new Date().toISOString(), customer.name, customer.phone, customer.email, customer.address, customer.city);
 
   try {
     const response = await fetch('https://sandbox.paywith.pawapay.io/api/v1/sessions', {

@@ -54,31 +54,8 @@
         </div>
       `;
 
-      document.getElementById('buy-btn').onclick = async () => {
-        const btn = document.getElementById('buy-btn');
-        btn.disabled = true;
-        btn.textContent = 'Processing...';
-
-        try {
-          const payRes = await fetch('/api/pay', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productId: product.id }),
-          });
-          const payData = await payRes.json();
-
-          if (payData.success && payData.redirectUrl) {
-            window.location.href = payData.redirectUrl;
-          } else {
-            alert(payData.error || 'Payment failed. Please try again.');
-            btn.disabled = false;
-            btn.textContent = 'Buy Now';
-          }
-        } catch {
-          alert('Could not connect to payment service. Please try again.');
-          btn.disabled = false;
-          btn.textContent = 'Buy Now';
-        }
+      document.getElementById('buy-btn').onclick = () => {
+        window.location.href = `/checkout.html?id=${product.id}`;
       };
     }
 

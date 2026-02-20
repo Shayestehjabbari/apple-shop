@@ -90,6 +90,8 @@ async function loadPayments() {
       <thead>
         <tr>
           <th>Date</th>
+          <th>Customer</th>
+          <th>Phone</th>
           <th>Product</th>
           <th>Amount</th>
           <th>Status</th>
@@ -104,6 +106,8 @@ async function loadPayments() {
     html += `
       <tr>
         <td>${esc(date)}</td>
+        <td>${esc(p.customerName || '—')}</td>
+        <td>${esc(p.customerPhone || '—')}</td>
         <td>${esc(p.productName || 'Deleted product')}</td>
         <td>ZMW ${Number(p.amount).toLocaleString()}</td>
         <td><span class="status-badge status-${esc(p.status)}">${esc(p.status)}</span></td>

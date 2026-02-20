@@ -26,9 +26,23 @@ db.exec(`
     amount REAL NOT NULL,
     status TEXT DEFAULT 'pending',
     createdAt TEXT NOT NULL,
+    customerName TEXT,
+    customerPhone TEXT,
+    customerEmail TEXT,
+    customerAddress TEXT,
+    customerCity TEXT,
     FOREIGN KEY (productId) REFERENCES products(id)
   );
 `);
+
+// Migration: add customer columns to existing payments table
+const cols = db.prepare("PRAGMA table_info(payments)").all().map(c => c.name);
+const newCols = ['customerName', 'customerPhone', 'customerEmail', 'customerAddress', 'customerCity'];
+for (const col of newCols) {
+  if (!cols.includes(col)) {
+    db.exec(`ALTER TABLE payments ADD COLUMN ${col} TEXT`);
+  }
+}
 
 // Seed products if table is empty
 const count = db.prepare('SELECT COUNT(*) as cnt FROM products').get();
