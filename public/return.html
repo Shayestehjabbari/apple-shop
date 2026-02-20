@@ -14,11 +14,79 @@
   </header>
 
   <main class="return-page">
-    <div class="return-card">
+    <div class="return-card" id="return-card">
       <h1>Thank you for your purchase!</h1>
-      <p>Your payment is being processed. You will receive a confirmation shortly.</p>
-      <a href="/" class="btn-primary">Back to Shop</a>
+      <p>Your payment is being processed.</p>
+      <button class="btn-primary" id="check-status-btn" onclick="checkStatus()">Check Payment Status</button>
+      <div style="margin-top: 16px;">
+        <a href="/" class="back-link">Back to Shop</a>
+      </div>
     </div>
   </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const depositId = params.get('depositId');
+
+    async function checkStatus() {
+      if (!depositId) {
+        showResult('unknown');
+        return;
+      }
+
+      const btn = document.getElementById('check-status-btn');
+      btn.textContent = 'Checking...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`/api/payments/${depositId}/status`, { cache: 'no-store' });
+        const data = await res.json();
+
+        if (res.ok) {
+          showResult(data.status);
+        } else {
+          showResult('pending');
+        }
+      } catch {
+        showResult('pending');
+      }
+    }
+
+    function esc(str) {
+      const el = document.createElement('span');
+      el.textContent = str;
+      return el.innerHTML;
+    }
+
+    function showResult(status) {
+      const card = document.getElementById('return-card');
+
+      if (status === 'completed') {
+        card.innerHTML = `
+          <div class="status-icon status-icon-success">&#10003;</div>
+          <h1 style="color: #34c759;">Purchase Completed!</h1>
+          <p>Your payment has been received successfully. Thank you for shopping with us!</p>
+          <a href="/" class="btn-primary">Back to Shop</a>
+        `;
+      } else if (status === 'failed') {
+        card.innerHTML = `
+          <div class="status-icon status-icon-failed">&#10007;</div>
+          <h1 style="color: #ff3b30;">Payment Failed</h1>
+          <p>Unfortunately your payment could not be processed. Please try again or contact support.</p>
+          <a href="/" class="btn-primary">Back to Shop</a>
+        `;
+      } else {
+        card.innerHTML = `
+          <div class="status-icon status-icon-pending">&#8987;</div>
+          <h1 style="color: #ff9500;">Payment Pending</h1>
+          <p>Your payment is still being processed. Please check back in a few moments.</p>
+          <button class="btn-primary" onclick="checkStatus()">Check Again</button>
+          <div style="margin-top: 16px;">
+            <a href="/" class="back-link">Back to Shop</a>
+          </div>
+        `;
+      }
+    }
+  </script>
 </body>
 </html>

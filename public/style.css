@@ -174,13 +174,30 @@ header {
 .return-card h1 {
   font-size: 24px;
   margin-bottom: 12px;
-  color: #34c759;
 }
 
 .return-card p {
   font-size: 16px;
   color: #6e6e73;
   margin-bottom: 24px;
+}
+
+.status-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.status-icon-success { color: #34c759; }
+.status-icon-failed { color: #ff3b30; }
+.status-icon-pending { color: #ff9500; }
+
+.back-link {
+  color: #0071e3;
+  font-size: 14px;
+}
+
+.back-link:hover {
+  text-decoration: underline;
 }
 
 .btn-primary {

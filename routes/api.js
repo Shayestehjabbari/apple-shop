@@ -68,7 +68,7 @@ router.post('/pay', async (req, res) => {
       },
       body: JSON.stringify({
         depositId,
-        returnUrl: `${BASE_URL}/index.html`,
+        returnUrl: `${BASE_URL}/return.html?depositId=${depositId}`,
         amount: Number(product.price).toFixed(2),
         country: 'ZMB',
         reason: `Purchase: ${product.name} — ${customer.name}`,
