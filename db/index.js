@@ -38,8 +38,8 @@ if (count.cnt === 0) {
   );
 
   const products = [
-    ['iPhone 17', 18999, 'https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/iphone-16-hero-ultramarine?wid=400', 'A19 chip. 48MP Fusion camera. Ceramic Shield front. Available in five stunning colors.'],
-    ['iPhone 17 Pro Max', 27999, 'https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/iphone-16-pro-hero-desert-titanium?wid=400', 'A19 Pro chip. 48MP camera system. Titanium design. The most powerful iPhone ever.'],
+    ['iPhone 17', 18999, '/images/iphone17.png', 'A19 chip. 48MP Fusion camera. Ceramic Shield front. Available in five stunning colors.'],
+    ['iPhone 17 Pro Max', 27999, '/images/iphone17promax.png', 'A19 Pro chip. 48MP camera system. Titanium design. The most powerful iPhone ever.'],
   ];
 
   const insertMany = db.transaction((items) => {

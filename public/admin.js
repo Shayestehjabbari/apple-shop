@@ -40,15 +40,20 @@ document.getElementById('add-form').onsubmit = async (e) => {
   e.preventDefault();
   const name = document.getElementById('p-name').value.trim();
   const price = parseFloat(document.getElementById('p-price').value);
-  const image = document.getElementById('p-image').value.trim();
+  const imageFile = document.getElementById('p-image').files[0];
   const description = document.getElementById('p-desc').value.trim();
 
   if (!name || !price) return;
 
+  const formData = new FormData();
+  formData.append('name', name);
+  formData.append('price', price);
+  formData.append('description', description);
+  if (imageFile) formData.append('image', imageFile);
+
   await fetch('/api/products', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, price, image, description }),
+    body: formData,
   });
 
   document.getElementById('add-form').reset();
@@ -59,6 +64,20 @@ document.getElementById('add-form').onsubmit = async (e) => {
 async function loadPayments() {
   const res = await fetch('/api/payments');
   const { data } = await res.json();
+
+  // Refresh status from PawaPay for pending payments
+  const pending = data.filter(p => p.status === 'pending');
+  await Promise.all(pending.map(p =>
+    fetch(`/api/payments/${p.depositId}/status`).catch(() => {})
+  ));
+
+  // Reload if any statuses were updated
+  if (pending.length > 0) {
+    const updated = await fetch('/api/payments');
+    const updatedData = await updated.json();
+    data.length = 0;
+    data.push(...updatedData.data);
+  }
   const container = document.getElementById('payments-list');
 
   if (data.length === 0) {

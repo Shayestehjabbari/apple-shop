@@ -1,6 +1,17 @@
 const express = require('express');
+const path = require('path');
+const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
+
+const storage = multer.diskStorage({
+  destination: path.join(__dirname, '..', 'public', 'images'),
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${uuidv4()}${ext}`);
+  },
+});
+const upload = multer({ storage });
 
 const router = express.Router();
 
@@ -126,15 +137,17 @@ router.get('/payments/:depositId/status', async (req, res) => {
 // --- Admin routes ---
 
 // Add a new product
-router.post('/products', (req, res) => {
-  const { name, price, image, description } = req.body;
+router.post('/products', upload.single('image'), (req, res) => {
+  const { name, price, description } = req.body;
   if (!name || !price) {
     return res.status(400).json({ success: false, error: 'name and price are required' });
   }
 
+  const image = req.file ? `/images/${req.file.filename}` : '';
+
   const result = db.prepare(
     'INSERT INTO products (name, price, image, description) VALUES (?, ?, ?, ?)'
-  ).run(name, price, image || '', description || '');
+  ).run(name, price, image, description || '');
 
   res.json({ success: true, data: { id: result.lastInsertRowid } });
 });
