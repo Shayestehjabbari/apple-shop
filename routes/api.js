@@ -71,7 +71,7 @@ router.post('/pay', async (req, res) => {
         returnUrl: `${BASE_URL}/index.html`,
         amount: Number(product.price).toFixed(2),
         country: 'ZMB',
-        reason: `Purchase: ${product.name}`,
+        reason: `Purchase: ${product.name} — ${customer.name}`,
       }),
     });
 
