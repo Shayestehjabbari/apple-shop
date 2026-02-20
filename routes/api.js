@@ -142,8 +142,9 @@ router.get('/payments/:depositId/status', async (req, res) => {
 
 // Add a new product
 router.post('/products', upload.single('image'), (req, res) => {
-  const { name, price, description } = req.body;
-  if (!name || !price) {
+  const { name, description } = req.body;
+  const price = parseFloat(req.body.price);
+  if (!name || isNaN(price)) {
     return res.status(400).json({ success: false, error: 'name and price are required' });
   }
 
@@ -154,6 +155,28 @@ router.post('/products', upload.single('image'), (req, res) => {
   ).run(name, price, image, description || '');
 
   res.json({ success: true, data: { id: result.lastInsertRowid } });
+});
+
+// Update a product
+router.put('/products/:id', upload.single('image'), (req, res) => {
+  const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+  if (!product) {
+    return res.status(404).json({ success: false, error: 'Product not found' });
+  }
+
+  const { name, description } = req.body;
+  const price = parseFloat(req.body.price);
+  if (!name || isNaN(price)) {
+    return res.status(400).json({ success: false, error: 'name and price are required' });
+  }
+
+  const image = req.file ? `/images/${req.file.filename}` : product.image;
+
+  db.prepare(
+    'UPDATE products SET name = ?, price = ?, image = ?, description = ? WHERE id = ?'
+  ).run(name, price, image, description || '', req.params.id);
+
+  res.json({ success: true });
 });
 
 // Delete a product

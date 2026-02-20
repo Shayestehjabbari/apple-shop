@@ -256,6 +256,48 @@ header {
   font-size: 14px;
 }
 
+.admin-row-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-edit {
+  background: none;
+  border: 1px solid #0071e3;
+  color: #0071e3;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-edit:hover {
+  background: #0071e3;
+  color: #fff;
+}
+
+.btn-cancel {
+  background: none;
+  border: 1px solid #86868b;
+  color: #86868b;
+  padding: 12px 32px;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #86868b;
+  color: #fff;
+}
+
+.edit-form-actions {
+  display: flex;
+  gap: 12px;
+}
+
 .btn-delete {
   background: none;
   border: 1px solid #ff3b30;
@@ -368,6 +410,31 @@ header {
   color: #1d1d1f;
 }
 
+.trust-badges {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.trust-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: #34c759;
+}
+
+.trust-badge span {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6e6e73;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
 #checkout-form h3 {
   font-size: 16px;
   margin-bottom: 16px;
@@ -428,6 +495,19 @@ header {
 
   .checkout-card {
     padding: 20px;
+  }
+
+  .trust-badges {
+    gap: 16px;
+  }
+
+  .trust-badge svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .trust-badge span {
+    font-size: 10px;
   }
 
   .admin-table {

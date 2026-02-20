@@ -6,7 +6,7 @@ function esc(str) {
 
 // --- Products ---
 async function loadProducts() {
-  const res = await fetch('/api/products');
+  const res = await fetch('/api/products', { cache: 'no-store' });
   const { data } = await res.json();
   const container = document.getElementById('products-list');
 
@@ -24,15 +24,68 @@ async function loadProducts() {
         <strong>${esc(p.name)}</strong>
         <span>ZMW ${Number(p.price).toLocaleString()}</span>
       </div>
-      <button class="btn-delete" data-id="${p.id}">Delete</button>
+      <div class="admin-row-actions">
+        <button class="btn-edit" data-id="${p.id}">Edit</button>
+        <button class="btn-delete" data-id="${p.id}">Delete</button>
+      </div>
     `;
     row.querySelector('.btn-delete').onclick = async () => {
       if (!confirm(`Delete "${p.name}"?`)) return;
       await fetch(`/api/products/${p.id}`, { method: 'DELETE' });
       loadProducts();
     };
+    row.querySelector('.btn-edit').onclick = () => showEditForm(p);
     container.appendChild(row);
   }
+}
+
+// --- Edit product ---
+function showEditForm(product) {
+  const container = document.getElementById('edit-section');
+  container.style.display = 'block';
+  container.innerHTML = `
+    <h2>Edit Product</h2>
+    <form id="edit-form" class="add-form">
+      <input type="text" id="e-name" value="${esc(product.name)}" placeholder="Product name" required>
+      <input type="number" id="e-price" value="${product.price}" placeholder="Price (ZMW)" step="0.01" required>
+      <input type="file" id="e-image" accept="image/*">
+      <textarea id="e-desc" placeholder="Description" rows="2">${esc(product.description || '')}</textarea>
+      <div class="edit-form-actions">
+        <button type="submit" class="btn-primary">Save Changes</button>
+        <button type="button" id="edit-cancel" class="btn-cancel">Cancel</button>
+      </div>
+    </form>
+  `;
+
+  document.getElementById('edit-cancel').onclick = () => {
+    container.style.display = 'none';
+  };
+
+  document.getElementById('edit-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('name', document.getElementById('e-name').value.trim());
+    formData.append('price', document.getElementById('e-price').value);
+    formData.append('description', document.getElementById('e-desc').value.trim());
+    const imageFile = document.getElementById('e-image').files[0];
+    if (imageFile) formData.append('image', imageFile);
+
+    const res = await fetch(`/api/products/${product.id}`, {
+      method: 'PUT',
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(err.error || 'Failed to update product');
+      return;
+    }
+
+    container.style.display = 'none';
+    loadProducts();
+  };
+
+  container.scrollIntoView({ behavior: 'smooth' });
 }
 
 // --- Add product ---
