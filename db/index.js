@@ -85,7 +85,9 @@ const products = [
   ['Apple 20W USB-C Adapter', 499, '/images/usbc-adapter.svg', 'Fast charging power adapter. USB-C connector. Compatible with any USB-C cable.', 60, 'Accessories'],
 ];
 
-if (count.cnt === 0 || count.cnt === SEED_COUNT) {
+const hasPayments = db.prepare('SELECT COUNT(*) as cnt FROM payments').get().cnt > 0;
+
+if (count.cnt === 0 || (count.cnt === SEED_COUNT && !hasPayments)) {
   if (count.cnt > 0) {
     db.exec('PRAGMA foreign_keys = OFF');
     db.exec('DELETE FROM product_images');
