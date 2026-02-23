@@ -6,8 +6,15 @@ const db = require('../db');
 
 const fs = require('fs');
 
+const imagesDir = process.env.DATA_DIR
+  ? path.join(path.resolve(process.env.DATA_DIR), 'images')
+  : path.join(__dirname, '..', 'data', 'images');
+if (!fs.existsSync(imagesDir)) {
+  fs.mkdirSync(imagesDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
-  destination: path.join(__dirname, '..', 'public', 'images'),
+  destination: imagesDir,
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname);
     cb(null, `${uuidv4()}${ext}`);
@@ -293,7 +300,7 @@ router.delete('/product-images/:id', (req, res) => {
     return res.status(404).json({ success: false, error: 'Image not found' });
   }
   // Remove file from disk
-  const filePath = path.join(__dirname, '..', 'public', img.imagePath);
+  const filePath = path.join(imagesDir, path.basename(img.imagePath));
   try { fs.unlinkSync(filePath); } catch {}
   db.prepare('DELETE FROM product_images WHERE id = ?').run(req.params.id);
   res.json({ success: true });

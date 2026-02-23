@@ -6,6 +6,9 @@
     "start": "node server.js"
   },
   "description": "Simple Apple product shop",
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "better-sqlite3": "^12.6.2",
     "dotenv": "^17.3.1",
