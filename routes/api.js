@@ -248,6 +248,29 @@ router.get('/orders', (req, res) => {
   res.json({ success: true, data: orders });
 });
 
+// Admin dashboard stats
+router.get('/admin/stats', (_req, res) => {
+  const products = db.prepare('SELECT COUNT(*) as total, COALESCE(SUM(stock), 0) as totalStock FROM products').get();
+  const outOfStock = db.prepare('SELECT COUNT(*) as count FROM products WHERE stock = 0').get().count;
+  const lowStock = db.prepare('SELECT COUNT(*) as count FROM products WHERE stock > 0 AND stock < 5').get().count;
+  const revenue = db.prepare("SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE status = 'completed'").get().total;
+  const pending = db.prepare("SELECT COUNT(*) as count FROM payments WHERE status = 'pending'").get().count;
+  const totalOrders = db.prepare('SELECT COUNT(*) as count FROM payments').get().count;
+
+  res.json({
+    success: true,
+    data: {
+      totalProducts: products.total,
+      totalStock: products.totalStock,
+      outOfStock,
+      lowStock,
+      revenue,
+      pendingOrders: pending,
+      totalOrders,
+    },
+  });
+});
+
 // Delete a gallery image
 router.delete('/product-images/:id', (req, res) => {
   const img = db.prepare('SELECT * FROM product_images WHERE id = ?').get(req.params.id);

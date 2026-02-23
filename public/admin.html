@@ -14,7 +14,19 @@
     </div>
   </header>
 
+  <div id="toast-container"></div>
+
   <main class="admin-container">
+    <section class="admin-section dashboard-section">
+      <h2>Dashboard</h2>
+      <div id="dashboard-cards" class="dashboard-grid">
+        <div class="dash-card"><div class="dash-value" id="stat-products">—</div><div class="dash-label">Products</div></div>
+        <div class="dash-card"><div class="dash-value" id="stat-revenue">—</div><div class="dash-label">Revenue</div></div>
+        <div class="dash-card"><div class="dash-value" id="stat-pending">—</div><div class="dash-label">Pending Orders</div></div>
+        <div class="dash-card"><div class="dash-value" id="stat-stock-warn">—</div><div class="dash-label">Out of Stock / Low Stock</div></div>
+      </div>
+    </section>
+
     <section class="admin-section">
       <h2>Add Product</h2>
       <form id="add-form" class="add-form">
@@ -24,11 +36,15 @@
         <select id="p-category">
           <option value="">— Category —</option>
           <option value="iPhone">iPhone</option>
+          <option value="Laptop">Laptop</option>
+          <option value="Tablet">Tablet</option>
           <option value="Accessories">Accessories</option>
           <option value="Cases">Cases</option>
         </select>
         <label class="file-label">Main Image <input type="file" id="p-image" accept="image/*"></label>
+        <div id="p-image-preview" class="image-preview-area"></div>
         <label class="file-label">Gallery Images <input type="file" id="p-gallery" accept="image/*" multiple></label>
+        <div id="p-gallery-preview" class="image-preview-row"></div>
         <textarea id="p-desc" placeholder="Description" rows="2"></textarea>
         <button type="submit" class="btn-primary">Add Product</button>
       </form>
@@ -38,11 +54,21 @@
 
     <section class="admin-section">
       <h2>Products</h2>
+      <input type="text" id="product-search" class="admin-search-input" placeholder="Search products by name or category...">
       <div id="products-list"></div>
     </section>
 
     <section class="admin-section">
       <h2>Transactions</h2>
+      <div class="transaction-filters">
+        <input type="text" id="txn-search" class="admin-search-input" placeholder="Search by customer, phone, or product...">
+        <select id="txn-status-filter" class="admin-filter-select">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+          <option value="failed">Failed</option>
+        </select>
+      </div>
       <div id="payments-list"></div>
     </section>
   </main>
