@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transaction — iPhone Zambia</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="/" class="logo">iPhone Zambia</a>
+      <a href="/admin.html" class="header-link">Admin</a>
+    </div>
+  </header>
+
+  <main class="return-page" id="txn-page">
+    <div class="return-card" id="txn-card">
+      <p>Loading...</p>
+    </div>
+  </main>
+
+  <script>
+    function esc(str) {
+      const el = document.createElement('span');
+      el.textContent = str;
+      return el.innerHTML;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const depositId = params.get('depositId');
+
+    async function loadTransaction() {
+      if (!depositId) {
+        document.getElementById('txn-card').innerHTML = '<p>No transaction ID provided.</p>';
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/payments/${encodeURIComponent(depositId)}`);
+        const { success, data, error } = await res.json();
+
+        if (!success) {
+          document.getElementById('txn-card').innerHTML = `<p>${esc(error || 'Transaction not found.')}</p>`;
+          return;
+        }
+
+        document.title = `Transaction ${data.depositId.slice(0, 8)}... — iPhone Zambia`;
+        renderTransaction(data);
+      } catch {
+        document.getElementById('txn-card').innerHTML = '<p>Failed to load transaction.</p>';
+      }
+    }
+
+    function renderTransaction(t) {
+      const statusIcons = { completed: '&#10003;', failed: '&#10007;', pending: '&#8987;' };
+      const statusColors = { completed: 'success', failed: 'failed', pending: 'pending' };
+      const statusKey = statusColors[t.status] || 'pending';
+      const date = new Date(t.createdAt).toLocaleString();
+
+      const thumbHtml = t.productImage
+        ? `<img class="txn-product-thumb" src="${esc(t.productImage)}" alt="${esc(t.productName || '')}">`
+        : '';
+
+      const checkBtn = t.status === 'pending'
+        ? `<button class="btn-primary" id="check-status-btn" style="margin-top: 20px;">Check Status</button>`
+        : '';
+
+      document.getElementById('txn-card').innerHTML = `
+        <div class="status-icon status-icon-${statusKey}">${statusIcons[t.status] || statusIcons.pending}</div>
+        <span class="status-badge status-${esc(t.status)}" style="font-size: 14px; padding: 4px 16px;">${esc(t.status)}</span>
+
+        <div class="txn-order-info">
+          ${thumbHtml}
+          <div class="txn-order-fields">
+            <div><span class="txn-detail-label">Product</span><span>${esc(t.productName || 'Deleted product')}</span></div>
+            <div><span class="txn-detail-label">Amount</span><span>ZMW ${Number(t.amount).toLocaleString()}</span></div>
+            <div><span class="txn-detail-label">Date</span><span>${esc(date)}</span></div>
+            <div><span class="txn-detail-label">Deposit ID</span><span class="deposit-id">${esc(t.depositId)}</span></div>
+          </div>
+        </div>
+
+        <div class="txn-customer-section">
+          <h3>Customer Details</h3>
+          <div class="txn-detail-grid">
+            <div><span class="txn-detail-label">Full Name</span><span>${esc(t.customerName || '—')}</span></div>
+            <div><span class="txn-detail-label">Phone</span><span>${esc(t.customerPhone || '—')}</span></div>
+            <div><span class="txn-detail-label">Email</span><span>${esc(t.customerEmail || '—')}</span></div>
+            <div><span class="txn-detail-label">Address</span><span>${esc(t.customerAddress || '—')}</span></div>
+            <div><span class="txn-detail-label">City</span><span>${esc(t.customerCity || '—')}</span></div>
+          </div>
+        </div>
+
+        ${checkBtn}
+
+        <div style="margin-top: 20px;">
+          <a href="/admin.html" class="back-link">&larr; Back to Admin</a>
+        </div>
+      `;
+
+      const btn = document.getElementById('check-status-btn');
+      if (btn) {
+        btn.onclick = checkStatus;
+      }
+    }
+
+    async function checkStatus() {
+      const btn = document.getElementById('check-status-btn');
+      btn.textContent = 'Checking...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`/api/payments/${encodeURIComponent(depositId)}/status`, { cache: 'no-store' });
+        const data = await res.json();
+
+        if (res.ok && data.status) {
+          // Reload the full transaction to reflect updated status
+          await loadTransaction();
+        } else {
+          btn.textContent = 'Check Status';
+          btn.disabled = false;
+        }
+      } catch {
+        btn.textContent = 'Check Status';
+        btn.disabled = false;
+      }
+    }
+
+    loadTransaction();
+  </script>
+</body>
+</html>

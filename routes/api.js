@@ -221,6 +221,21 @@ router.delete('/products/:id', (req, res) => {
   res.json({ success: true });
 });
 
+// Get single payment with product info
+router.get('/payments/:depositId', (req, res) => {
+  const { depositId } = req.params;
+  const payment = db.prepare(`
+    SELECT p.*, pr.name as productName, pr.image as productImage
+    FROM payments p
+    LEFT JOIN products pr ON pr.id = p.productId
+    WHERE p.depositId = ?
+  `).get(depositId);
+  if (!payment) {
+    return res.status(404).json({ success: false, error: 'Payment not found' });
+  }
+  res.json({ success: true, data: payment });
+});
+
 // Get all payments (admin)
 router.get('/payments', (_req, res) => {
   const payments = db.prepare(`

@@ -332,6 +332,7 @@ function renderPayments(data) {
           <th>Amount</th>
           <th>Status</th>
           <th>Deposit ID</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -340,7 +341,7 @@ function renderPayments(data) {
   for (const p of data) {
     const date = new Date(p.createdAt).toLocaleString();
     html += `
-      <tr>
+      <tr class="txn-row" data-deposit="${esc(p.depositId)}">
         <td>${esc(date)}</td>
         <td>${esc(p.customerName || '—')}</td>
         <td>${esc(p.customerPhone || '—')}</td>
@@ -348,12 +349,42 @@ function renderPayments(data) {
         <td>ZMW ${Number(p.amount).toLocaleString()}</td>
         <td><span class="status-badge status-${esc(p.status)}">${esc(p.status)}</span></td>
         <td class="deposit-id">${esc(p.depositId)}</td>
+        <td><a href="/transaction.html?depositId=${encodeURIComponent(p.depositId)}" class="btn-view" onclick="event.stopPropagation()">View</a></td>
+      </tr>
+      <tr class="txn-detail-row" id="detail-${esc(p.depositId)}" style="display:none">
+        <td colspan="8">
+          <div class="txn-detail">
+            <div class="txn-detail-grid">
+              <div><span class="txn-detail-label">Full Name</span><span>${esc(p.customerName || '—')}</span></div>
+              <div><span class="txn-detail-label">Phone</span><span>${esc(p.customerPhone || '—')}</span></div>
+              <div><span class="txn-detail-label">Email</span><span>${esc(p.customerEmail || '—')}</span></div>
+              <div><span class="txn-detail-label">Address</span><span>${esc(p.customerAddress || '—')}</span></div>
+              <div><span class="txn-detail-label">City</span><span>${esc(p.customerCity || '—')}</span></div>
+              <div><span class="txn-detail-label">Deposit ID</span><span class="deposit-id">${esc(p.depositId)}</span></div>
+            </div>
+          </div>
+        </td>
       </tr>
     `;
   }
 
   html += '</tbody></table>';
   container.innerHTML = html;
+
+  // Toggle detail rows on click
+  container.querySelectorAll('.txn-row').forEach(row => {
+    row.onclick = () => {
+      const detailRow = document.getElementById(`detail-${row.dataset.deposit}`);
+      const isOpen = detailRow.style.display !== 'none';
+      // Close all open detail rows
+      container.querySelectorAll('.txn-detail-row').forEach(r => r.style.display = 'none');
+      container.querySelectorAll('.txn-row').forEach(r => r.classList.remove('txn-row-active'));
+      if (!isOpen) {
+        detailRow.style.display = '';
+        row.classList.add('txn-row-active');
+      }
+    };
+  });
 }
 
 // --- Transaction filters ---

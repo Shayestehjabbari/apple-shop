@@ -937,6 +937,104 @@ header {
   background: #f5f5f7;
 }
 
+/* Transaction detail expand */
+.txn-row {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.txn-row:hover {
+  background: #f5f5f7;
+}
+
+.txn-row-active {
+  background: #f0f0f5;
+}
+
+.txn-detail-row td {
+  padding: 0 !important;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.txn-detail {
+  padding: 16px 12px;
+  background: #fafafa;
+}
+
+.txn-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.txn-detail-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.txn-detail-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #86868b;
+}
+
+/* Transaction detail page */
+.txn-order-info {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin: 24px 0;
+  padding: 20px;
+  background: #f5f5f7;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.txn-product-thumb {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.txn-order-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.txn-order-fields > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.txn-customer-section {
+  text-align: left;
+  margin-top: 24px;
+}
+
+.txn-customer-section h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: #1d1d1f;
+}
+
+/* View button in admin table */
+.btn-view {
+  color: #0071e3;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.btn-view:hover {
+  text-decoration: underline;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   .detail-card {
