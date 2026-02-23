@@ -17,12 +17,16 @@ async function loadProducts() {
 
   container.innerHTML = '';
   for (const p of data) {
+    const stockClass = p.stock > 0 ? 'stock-available' : 'stock-out';
+    const stockText = p.stock > 0 ? `${p.stock} in stock` : 'Out of stock';
     const row = document.createElement('div');
     row.className = 'admin-row';
     row.innerHTML = `
       <div class="admin-row-info">
         <strong>${esc(p.name)}</strong>
         <span>ZMW ${Number(p.price).toLocaleString()}</span>
+        <span class="stock-badge ${stockClass}">${stockText}</span>
+        ${p.category ? `<span class="category-tag">${esc(p.category)}</span>` : ''}
       </div>
       <div class="admin-row-actions">
         <button class="btn-edit" data-id="${p.id}">Edit</button>
@@ -40,22 +44,60 @@ async function loadProducts() {
 }
 
 // --- Edit product ---
-function showEditForm(product) {
+async function showEditForm(product) {
+  // Fetch full product to get gallery images
+  const res = await fetch(`/api/products/${product.id}`, { cache: 'no-store' });
+  const { data: fullProduct } = await res.json();
+  const images = fullProduct.images || [];
+
   const container = document.getElementById('edit-section');
   container.style.display = 'block';
+
+  let galleryHtml = '';
+  if (images.length > 0) {
+    galleryHtml = '<div class="admin-gallery"><p class="gallery-label">Gallery images:</p><div class="admin-gallery-grid">';
+    for (const img of images) {
+      galleryHtml += `
+        <div class="admin-gallery-item" data-id="${img.id}">
+          <img src="${esc(img.imagePath)}" alt="Gallery">
+          <button type="button" class="gallery-delete-btn" data-img-id="${img.id}">&times;</button>
+        </div>
+      `;
+    }
+    galleryHtml += '</div></div>';
+  }
+
   container.innerHTML = `
     <h2>Edit Product</h2>
     <form id="edit-form" class="add-form">
-      <input type="text" id="e-name" value="${esc(product.name)}" placeholder="Product name" required>
-      <input type="number" id="e-price" value="${product.price}" placeholder="Price (ZMW)" step="0.01" required>
-      <input type="file" id="e-image" accept="image/*">
-      <textarea id="e-desc" placeholder="Description" rows="2">${esc(product.description || '')}</textarea>
+      <input type="text" id="e-name" value="${esc(fullProduct.name)}" placeholder="Product name" required>
+      <input type="number" id="e-price" value="${fullProduct.price}" placeholder="Price (ZMW)" step="0.01" required>
+      <input type="number" id="e-stock" value="${fullProduct.stock}" placeholder="Stock quantity" min="0">
+      <select id="e-category">
+        <option value="">— Category —</option>
+        <option value="iPhone" ${fullProduct.category === 'iPhone' ? 'selected' : ''}>iPhone</option>
+        <option value="Accessories" ${fullProduct.category === 'Accessories' ? 'selected' : ''}>Accessories</option>
+        <option value="Cases" ${fullProduct.category === 'Cases' ? 'selected' : ''}>Cases</option>
+      </select>
+      <label class="file-label">Main Image <input type="file" id="e-image" accept="image/*"></label>
+      <label class="file-label">Add Gallery Images <input type="file" id="e-gallery" accept="image/*" multiple></label>
+      <textarea id="e-desc" placeholder="Description" rows="2">${esc(fullProduct.description || '')}</textarea>
+      ${galleryHtml}
       <div class="edit-form-actions">
         <button type="submit" class="btn-primary">Save Changes</button>
         <button type="button" id="edit-cancel" class="btn-cancel">Cancel</button>
       </div>
     </form>
   `;
+
+  // Gallery delete buttons
+  container.querySelectorAll('.gallery-delete-btn').forEach(btn => {
+    btn.onclick = async () => {
+      const imgId = btn.dataset.imgId;
+      await fetch(`/api/product-images/${imgId}`, { method: 'DELETE' });
+      btn.closest('.admin-gallery-item').remove();
+    };
+  });
 
   document.getElementById('edit-cancel').onclick = () => {
     container.style.display = 'none';
@@ -66,11 +108,17 @@ function showEditForm(product) {
     const formData = new FormData();
     formData.append('name', document.getElementById('e-name').value.trim());
     formData.append('price', document.getElementById('e-price').value);
+    formData.append('stock', document.getElementById('e-stock').value);
+    formData.append('category', document.getElementById('e-category').value);
     formData.append('description', document.getElementById('e-desc').value.trim());
+
     const imageFile = document.getElementById('e-image').files[0];
     if (imageFile) formData.append('image', imageFile);
 
-    const res = await fetch(`/api/products/${product.id}`, {
+    const galleryFiles = document.getElementById('e-gallery').files;
+    for (const f of galleryFiles) formData.append('gallery', f);
+
+    const res = await fetch(`/api/products/${fullProduct.id}`, {
       method: 'PUT',
       body: formData,
     });
@@ -93,7 +141,10 @@ document.getElementById('add-form').onsubmit = async (e) => {
   e.preventDefault();
   const name = document.getElementById('p-name').value.trim();
   const price = parseFloat(document.getElementById('p-price').value);
+  const stock = document.getElementById('p-stock').value;
+  const category = document.getElementById('p-category').value;
   const imageFile = document.getElementById('p-image').files[0];
+  const galleryFiles = document.getElementById('p-gallery').files;
   const description = document.getElementById('p-desc').value.trim();
 
   if (!name || !price) return;
@@ -101,8 +152,11 @@ document.getElementById('add-form').onsubmit = async (e) => {
   const formData = new FormData();
   formData.append('name', name);
   formData.append('price', price);
+  formData.append('stock', stock);
+  formData.append('category', category);
   formData.append('description', description);
   if (imageFile) formData.append('image', imageFile);
+  for (const f of galleryFiles) formData.append('gallery', f);
 
   await fetch('/api/products', {
     method: 'POST',

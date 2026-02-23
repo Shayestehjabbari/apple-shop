@@ -20,7 +20,15 @@
       <form id="add-form" class="add-form">
         <input type="text" id="p-name" placeholder="Product name" required>
         <input type="number" id="p-price" placeholder="Price (ZMW)" step="0.01" required>
-        <input type="file" id="p-image" accept="image/*">
+        <input type="number" id="p-stock" placeholder="Stock quantity" min="0" value="0">
+        <select id="p-category">
+          <option value="">— Category —</option>
+          <option value="iPhone">iPhone</option>
+          <option value="Accessories">Accessories</option>
+          <option value="Cases">Cases</option>
+        </select>
+        <label class="file-label">Main Image <input type="file" id="p-image" accept="image/*"></label>
+        <label class="file-label">Gallery Images <input type="file" id="p-gallery" accept="image/*" multiple></label>
         <textarea id="p-desc" placeholder="Description" rows="2"></textarea>
         <button type="submit" class="btn-primary">Add Product</button>
       </form>

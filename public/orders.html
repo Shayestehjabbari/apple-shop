@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Orders — iPhone Zambia</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="/" class="logo">iPhone Zambia</a>
+      <a href="/orders.html" class="header-link">My Orders</a>
+    </div>
+  </header>
+
+  <main class="orders-page">
+    <div class="orders-card">
+      <h1>My Orders</h1>
+      <p class="orders-subtitle">Enter your phone number to view your order history.</p>
+      <form id="orders-form" class="orders-form">
+        <input type="tel" id="order-phone" placeholder="e.g. 0971234567" required>
+        <button type="submit" class="btn-primary">Look Up Orders</button>
+      </form>
+      <div id="orders-list"></div>
+    </div>
+  </main>
+
+  <script>
+    function esc(str) {
+      const el = document.createElement('span');
+      el.textContent = str;
+      return el.innerHTML;
+    }
+
+    document.getElementById('orders-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const phone = document.getElementById('order-phone').value.trim();
+      if (!phone) return;
+
+      const container = document.getElementById('orders-list');
+      container.innerHTML = '<p class="empty">Loading...</p>';
+
+      const res = await fetch(`/api/orders?phone=${encodeURIComponent(phone)}`);
+      const { data } = await res.json();
+
+      if (!data || data.length === 0) {
+        container.innerHTML = '<p class="empty">No orders found for this phone number.</p>';
+        return;
+      }
+
+      let html = '';
+      for (const order of data) {
+        const date = new Date(order.createdAt).toLocaleString();
+        html += `
+          <div class="order-item">
+            <div class="order-item-image">
+              <img src="${esc(order.productImage || '')}" alt="${esc(order.productName || '')}" onerror="this.style.display='none'">
+            </div>
+            <div class="order-item-info">
+              <strong>${esc(order.productName || 'Deleted product')}</strong>
+              <span class="order-date">${esc(date)}</span>
+              <span class="order-amount">ZMW ${Number(order.amount).toLocaleString()}</span>
+            </div>
+            <div class="order-item-status">
+              <span class="status-badge status-${esc(order.status)}">${esc(order.status)}</span>
+              <a href="/return.html?depositId=${esc(order.depositId)}" class="order-detail-link">View Details</a>
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    };
+  </script>
+</body>
+</html>

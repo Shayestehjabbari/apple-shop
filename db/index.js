@@ -44,16 +44,36 @@ for (const col of newCols) {
   }
 }
 
+// Migration: add stock column to products table
+const productCols = db.prepare("PRAGMA table_info(products)").all().map(c => c.name);
+if (!productCols.includes('stock')) {
+  db.exec("ALTER TABLE products ADD COLUMN stock INTEGER DEFAULT 0");
+}
+if (!productCols.includes('category')) {
+  db.exec("ALTER TABLE products ADD COLUMN category TEXT DEFAULT ''");
+}
+
+// Create product_images table for gallery
+db.exec(`
+  CREATE TABLE IF NOT EXISTS product_images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    productId INTEGER NOT NULL,
+    imagePath TEXT NOT NULL,
+    sortOrder INTEGER DEFAULT 0,
+    FOREIGN KEY (productId) REFERENCES products(id) ON DELETE CASCADE
+  );
+`);
+
 // Seed products if table is empty
 const count = db.prepare('SELECT COUNT(*) as cnt FROM products').get();
 if (count.cnt === 0) {
   const insert = db.prepare(
-    'INSERT INTO products (name, price, image, description) VALUES (?, ?, ?, ?)'
+    'INSERT INTO products (name, price, image, description, stock, category) VALUES (?, ?, ?, ?, ?, ?)'
   );
 
   const products = [
-    ['iPhone 17', 18999, '/images/iphone17.png', 'A19 chip. 48MP Fusion camera. Ceramic Shield front. Available in five stunning colors.'],
-    ['iPhone 17 Pro Max', 27999, '/images/iphone17promax.png', 'A19 Pro chip. 48MP camera system. Titanium design. The most powerful iPhone ever.'],
+    ['iPhone 17', 18999, '/images/iphone17.png', 'A19 chip. 48MP Fusion camera. Ceramic Shield front. Available in five stunning colors.', 10, 'iPhone'],
+    ['iPhone 17 Pro Max', 27999, '/images/iphone17promax.png', 'A19 Pro chip. 48MP camera system. Titanium design. The most powerful iPhone ever.', 5, 'iPhone'],
   ];
 
   const insertMany = db.transaction((items) => {

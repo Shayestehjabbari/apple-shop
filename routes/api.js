@@ -4,6 +4,8 @@ const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
 
+const fs = require('fs');
+
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '..', 'public', 'images'),
   filename: (_req, file, cb) => {
@@ -27,12 +29,14 @@ router.get('/products', (_req, res) => {
   res.json({ success: true, data: products });
 });
 
-// Get single product
+// Get single product (with gallery images)
 router.get('/products/:id', (req, res) => {
   const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
   if (!product) {
     return res.status(404).json({ success: false, error: 'Product not found' });
   }
+  const images = db.prepare('SELECT * FROM product_images WHERE productId = ? ORDER BY sortOrder').all(req.params.id);
+  product.images = images;
   res.json({ success: true, data: product });
 });
 
@@ -51,6 +55,13 @@ router.post('/pay', async (req, res) => {
   if (!product) {
     return res.status(404).json({ success: false, error: 'Product not found' });
   }
+
+  if (product.stock <= 0) {
+    return res.status(400).json({ success: false, error: 'Out of stock' });
+  }
+
+  // Decrement stock
+  db.prepare('UPDATE products SET stock = stock - 1 WHERE id = ?').run(productId);
 
   const depositId = uuidv4();
 
@@ -141,40 +152,62 @@ router.get('/payments/:depositId/status', async (req, res) => {
 // --- Admin routes ---
 
 // Add a new product
-router.post('/products', upload.single('image'), (req, res) => {
-  const { name, description } = req.body;
+router.post('/products', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'gallery', maxCount: 10 }]), (req, res) => {
+  const { name, description, category } = req.body;
   const price = parseFloat(req.body.price);
+  const stock = parseInt(req.body.stock, 10) || 0;
   if (!name || isNaN(price)) {
     return res.status(400).json({ success: false, error: 'name and price are required' });
   }
 
-  const image = req.file ? `/images/${req.file.filename}` : '';
+  const imageFile = req.files && req.files['image'] && req.files['image'][0];
+  const image = imageFile ? `/images/${imageFile.filename}` : '';
 
   const result = db.prepare(
-    'INSERT INTO products (name, price, image, description) VALUES (?, ?, ?, ?)'
-  ).run(name, price, image, description || '');
+    'INSERT INTO products (name, price, image, description, stock, category) VALUES (?, ?, ?, ?, ?, ?)'
+  ).run(name, price, image, description || '', stock, category || '');
+
+  // Insert gallery images
+  const galleryFiles = req.files && req.files['gallery'] || [];
+  const insertImage = db.prepare('INSERT INTO product_images (productId, imagePath, sortOrder) VALUES (?, ?, ?)');
+  for (let i = 0; i < galleryFiles.length; i++) {
+    insertImage.run(result.lastInsertRowid, `/images/${galleryFiles[i].filename}`, i);
+  }
 
   res.json({ success: true, data: { id: result.lastInsertRowid } });
 });
 
 // Update a product
-router.put('/products/:id', upload.single('image'), (req, res) => {
+router.put('/products/:id', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'gallery', maxCount: 10 }]), (req, res) => {
   const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
   if (!product) {
     return res.status(404).json({ success: false, error: 'Product not found' });
   }
 
-  const { name, description } = req.body;
+  const { name, description, category } = req.body;
   const price = parseFloat(req.body.price);
+  const stock = parseInt(req.body.stock, 10);
   if (!name || isNaN(price)) {
     return res.status(400).json({ success: false, error: 'name and price are required' });
   }
 
-  const image = req.file ? `/images/${req.file.filename}` : product.image;
+  const imageFile = req.files && req.files['image'] && req.files['image'][0];
+  const image = imageFile ? `/images/${imageFile.filename}` : product.image;
+  const finalStock = isNaN(stock) ? product.stock : stock;
 
   db.prepare(
-    'UPDATE products SET name = ?, price = ?, image = ?, description = ? WHERE id = ?'
-  ).run(name, price, image, description || '', req.params.id);
+    'UPDATE products SET name = ?, price = ?, image = ?, description = ?, stock = ?, category = ? WHERE id = ?'
+  ).run(name, price, image, description || '', finalStock, category || '', req.params.id);
+
+  // Insert new gallery images
+  const galleryFiles = req.files && req.files['gallery'] || [];
+  if (galleryFiles.length > 0) {
+    const maxSort = db.prepare('SELECT COALESCE(MAX(sortOrder), -1) as m FROM product_images WHERE productId = ?').get(req.params.id).m;
+    const insertImage = db.prepare('INSERT INTO product_images (productId, imagePath, sortOrder) VALUES (?, ?, ?)');
+    for (let i = 0; i < galleryFiles.length; i++) {
+      insertImage.run(req.params.id, `/images/${galleryFiles[i].filename}`, maxSort + 1 + i);
+    }
+  }
 
   res.json({ success: true });
 });
@@ -197,6 +230,35 @@ router.get('/payments', (_req, res) => {
     ORDER BY p.id DESC
   `).all();
   res.json({ success: true, data: payments });
+});
+
+// Order history by phone
+router.get('/orders', (req, res) => {
+  const phone = req.query.phone;
+  if (!phone) {
+    return res.status(400).json({ success: false, error: 'phone query parameter is required' });
+  }
+  const orders = db.prepare(`
+    SELECT p.*, pr.name as productName, pr.image as productImage
+    FROM payments p
+    LEFT JOIN products pr ON pr.id = p.productId
+    WHERE p.customerPhone = ?
+    ORDER BY p.id DESC
+  `).all(phone);
+  res.json({ success: true, data: orders });
+});
+
+// Delete a gallery image
+router.delete('/product-images/:id', (req, res) => {
+  const img = db.prepare('SELECT * FROM product_images WHERE id = ?').get(req.params.id);
+  if (!img) {
+    return res.status(404).json({ success: false, error: 'Image not found' });
+  }
+  // Remove file from disk
+  const filePath = path.join(__dirname, '..', 'public', img.imagePath);
+  try { fs.unlinkSync(filePath); } catch {}
+  db.prepare('DELETE FROM product_images WHERE id = ?').run(req.params.id);
+  res.json({ success: true });
 });
 
 module.exports = router;

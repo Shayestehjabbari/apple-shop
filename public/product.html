@@ -10,6 +10,7 @@
   <header>
     <div class="header-inner">
       <a href="/" class="logo">iPhone Zambia</a>
+      <a href="/orders.html" class="header-link">My Orders</a>
     </div>
   </header>
 
@@ -42,21 +43,53 @@
 
       document.title = `${product.name} — iPhone Zambia`;
 
+      const stockClass = product.stock > 0 ? 'stock-available' : 'stock-out';
+      const stockText = product.stock > 0 ? `${product.stock} in stock` : 'Out of Stock';
+      const btnDisabled = product.stock <= 0 ? 'disabled' : '';
+
+      // Build gallery thumbnails
+      const images = product.images || [];
+      let galleryHtml = '';
+      if (images.length > 0) {
+        const thumbs = images.map(img =>
+          `<img src="${esc(img.imagePath)}" alt="Gallery" class="gallery-thumb" onclick="setMainImage(this.src)" onerror="this.style.display='none'">`
+        ).join('');
+        galleryHtml = `
+          <div class="gallery-strip">
+            <img src="${esc(product.image)}" alt="${esc(product.name)}" class="gallery-thumb active" onclick="setMainImage(this.src)">
+            ${thumbs}
+          </div>
+        `;
+      }
+
       document.getElementById('product-detail').innerHTML = `
         <div class="detail-card">
-          <img src="${esc(product.image)}" alt="${esc(product.name)}" onerror="this.style.display='none'">
+          <div class="detail-images">
+            <img id="main-image" src="${esc(product.image)}" alt="${esc(product.name)}" onerror="this.style.display='none'">
+            ${galleryHtml}
+          </div>
           <div class="detail-info">
             <h1>${esc(product.name)}</h1>
             <p class="detail-desc">${esc(product.description)}</p>
             <div class="detail-price">ZMW ${Number(product.price).toLocaleString()}</div>
-            <button id="buy-btn" class="buy-btn">Buy Now</button>
+            <span class="stock-badge ${stockClass}">${stockText}</span>
+            <button id="buy-btn" class="buy-btn" ${btnDisabled}>${product.stock > 0 ? 'Buy Now' : 'Out of Stock'}</button>
           </div>
         </div>
       `;
 
-      document.getElementById('buy-btn').onclick = () => {
-        window.location.href = `/checkout.html?id=${product.id}`;
-      };
+      if (product.stock > 0) {
+        document.getElementById('buy-btn').onclick = () => {
+          window.location.href = `/checkout.html?id=${product.id}`;
+        };
+      }
+    }
+
+    function setMainImage(src) {
+      document.getElementById('main-image').src = src;
+      document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+      const clicked = [...document.querySelectorAll('.gallery-thumb')].find(t => t.src === src);
+      if (clicked) clicked.classList.add('active');
     }
 
     loadProduct();
