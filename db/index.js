@@ -87,9 +87,12 @@ const products = [
 
 if (count.cnt === 0 || count.cnt === SEED_COUNT) {
   if (count.cnt > 0) {
+    db.exec('PRAGMA foreign_keys = OFF');
     db.exec('DELETE FROM product_images');
+    db.exec('DELETE FROM payments');
     db.exec('DELETE FROM products');
     db.exec("DELETE FROM sqlite_sequence WHERE name='products'");
+    db.exec('PRAGMA foreign_keys = ON');
   }
 
   const insert = db.prepare(
