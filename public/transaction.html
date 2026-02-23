@@ -38,17 +38,18 @@
 
       try {
         const res = await fetch(`/api/payments/${encodeURIComponent(depositId)}`);
-        const { success, data, error } = await res.json();
-
-        if (!success) {
-          document.getElementById('txn-card').innerHTML = `<p>${esc(error || 'Transaction not found.')}</p>`;
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          document.getElementById('txn-card').innerHTML = `<p>${esc(body.error || 'Transaction not found.')}</p><div style="margin-top:16px;"><a href="/admin.html" class="back-link">&larr; Back to Admin</a></div>`;
           return;
         }
+        const { data } = await res.json();
 
         document.title = `Transaction ${data.depositId.slice(0, 8)}... — iPhone Zambia`;
         renderTransaction(data);
-      } catch {
-        document.getElementById('txn-card').innerHTML = '<p>Failed to load transaction.</p>';
+      } catch (err) {
+        console.error('Transaction load error:', err);
+        document.getElementById('txn-card').innerHTML = `<p>Failed to load transaction.</p><p style="font-size:12px;color:#86868b;margin-top:8px;">${esc(err.message)}</p><div style="margin-top:16px;"><a href="/admin.html" class="back-link">&larr; Back to Admin</a></div>`;
       }
     }
 
