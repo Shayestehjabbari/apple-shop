@@ -73,8 +73,11 @@ function renderProducts(products) {
     const stockClass = p.stock > 0 ? 'stock-available' : 'stock-out';
     const stockText = p.stock > 0 ? `${p.stock} in stock` : 'Out of Stock';
 
+    const categoryTag = p.category ? `<span class="sf-card-category">${esc(p.category)}</span>` : '';
+
     card.innerHTML = `
       <img src="${esc(p.image)}" alt="${esc(p.name)}" onerror="this.style.display='none'">
+      ${categoryTag}
       <h3>${esc(p.name)}</h3>
       <div class="description">${esc(p.description)}</div>
       <div class="price">ZMW ${Number(p.price).toLocaleString()}</div>

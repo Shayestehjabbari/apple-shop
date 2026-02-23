@@ -9,12 +9,18 @@
 <body>
   <header>
     <div class="header-inner">
-      <a href="/" class="logo">iPhone Zambia</a>
-      <a href="/admin.html" class="header-link">Admin</a>
+      <a href="/" class="logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        iPhone Zambia
+      </a>
+      <nav class="header-nav">
+        <a href="/" class="header-link">Shop</a>
+        <a href="/admin.html" class="header-link">Admin</a>
+      </nav>
     </div>
   </header>
 
-  <main class="return-page" id="txn-page">
+  <main class="return-page sf-fade-in" id="txn-page">
     <div class="return-card" id="txn-card">
       <p>Loading...</p>
     </div>
@@ -129,5 +135,15 @@
 
     loadTransaction();
   </script>
+
+  <footer class="sf-footer">
+    <div class="sf-footer-inner">
+      <span class="sf-footer-copy">&copy; 2026 iPhone Zambia</span>
+      <div class="sf-footer-links">
+        <a href="/">Shop</a>
+        <a href="/admin.html">Admin</a>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>

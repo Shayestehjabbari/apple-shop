@@ -9,13 +9,22 @@
 <body>
   <header>
     <div class="header-inner">
-      <a href="/" class="logo">iPhone Zambia</a>
-      <a href="/orders.html" class="header-link">My Orders</a>
+      <a href="/" class="logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        iPhone Zambia
+      </a>
+      <nav class="header-nav">
+        <a href="/" class="header-link">Shop</a>
+        <a href="/orders.html" class="header-link active">My Orders</a>
+      </nav>
     </div>
   </header>
 
-  <main class="orders-page">
+  <main class="orders-page sf-fade-in">
     <div class="orders-card">
+      <div class="sf-page-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
       <h1>My Orders</h1>
       <p class="orders-subtitle">Enter your phone number to view your order history.</p>
       <form id="orders-form" class="orders-form">
@@ -73,5 +82,15 @@
       container.innerHTML = html;
     };
   </script>
+
+  <footer class="sf-footer">
+    <div class="sf-footer-inner">
+      <span class="sf-footer-copy">&copy; 2026 iPhone Zambia</span>
+      <div class="sf-footer-links">
+        <a href="/">Shop</a>
+        <a href="/orders.html">My Orders</a>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>

@@ -9,17 +9,46 @@
 <body>
   <header>
     <div class="header-inner">
-      <a href="/" class="logo">iPhone Zambia</a>
-      <a href="/orders.html" class="header-link">My Orders</a>
+      <a href="/" class="logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        iPhone Zambia
+      </a>
+      <nav class="header-nav">
+        <a href="/" class="header-link active">Shop</a>
+        <a href="/orders.html" class="header-link">My Orders</a>
+      </nav>
     </div>
   </header>
+
+  <section class="sf-hero">
+    <div class="sf-hero-inner">
+      <div class="sf-hero-text">
+        <h1>iPhone Zambia</h1>
+        <p>Genuine Apple products delivered across Zambia. Pay easily with mobile money.</p>
+        <a href="#products" class="sf-hero-cta">Browse Products</a>
+      </div>
+      <div class="sf-hero-image">
+        <img src="/images/iphone17promax.png" alt="iPhone" onerror="this.style.display='none'">
+      </div>
+    </div>
+  </section>
 
   <div id="filter-bar" class="filter-bar">
     <div class="category-pills"></div>
     <input type="text" id="search-input" class="search-input" placeholder="Search products...">
   </div>
 
-  <main id="products" class="products"></main>
+  <main id="products" class="products sf-fade-in"></main>
+
+  <footer class="sf-footer">
+    <div class="sf-footer-inner">
+      <span class="sf-footer-copy">&copy; 2026 iPhone Zambia</span>
+      <div class="sf-footer-links">
+        <a href="/">Shop</a>
+        <a href="/orders.html">My Orders</a>
+      </div>
+    </div>
+  </footer>
 
   <script src="app.js"></script>
 </body>
