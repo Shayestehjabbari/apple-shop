@@ -6,72 +6,207 @@
   <title>Admin — iPhone Zambia</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <header>
-    <div class="header-inner">
-      <a href="/" class="logo">iPhone Zambia</a>
-      <span class="admin-badge">Admin</span>
-    </div>
-  </header>
+<body class="admin-body">
 
   <div id="toast-container"></div>
 
-  <main class="admin-container">
-    <section class="admin-section dashboard-section">
-      <h2>Dashboard</h2>
-      <div id="dashboard-cards" class="dashboard-grid">
-        <div class="dash-card"><div class="dash-value" id="stat-products">—</div><div class="dash-label">Products</div></div>
-        <div class="dash-card"><div class="dash-value" id="stat-revenue">—</div><div class="dash-label">Revenue</div></div>
-        <div class="dash-card"><div class="dash-value" id="stat-pending">—</div><div class="dash-label">Pending Orders</div></div>
-        <div class="dash-card"><div class="dash-value" id="stat-stock-warn">—</div><div class="dash-label">Out of Stock / Low Stock</div></div>
+  <!-- Mobile topbar -->
+  <div class="admin-topbar">
+    <button class="admin-hamburger" id="sidebar-toggle" aria-label="Toggle menu">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <span class="admin-topbar-title">Admin Panel</span>
+  </div>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="admin-sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-sidebar-logo">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0071e3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>
+      <span>iPhone Zambia</span>
+    </div>
+
+    <nav class="admin-nav">
+      <button class="admin-nav-item active" data-view="dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </button>
+      <button class="admin-nav-item" data-view="products">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        Products
+      </button>
+      <button class="admin-nav-item" data-view="transactions">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Transactions
+      </button>
+    </nav>
+
+    <div class="admin-sidebar-footer">
+      <a href="/" class="admin-nav-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Store
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="admin-main">
+
+    <!-- Dashboard view -->
+    <section class="admin-view active" id="view-dashboard">
+      <div class="admin-view-header">
+        <h1>Dashboard</h1>
+      </div>
+
+      <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon admin-stat-icon--blue">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+          </div>
+          <div class="admin-stat-value" id="stat-products">—</div>
+          <div class="admin-stat-label">Products</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon admin-stat-icon--green">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          </div>
+          <div class="admin-stat-value" id="stat-revenue">—</div>
+          <div class="admin-stat-label">Revenue</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon admin-stat-icon--orange">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="admin-stat-value" id="stat-pending">—</div>
+          <div class="admin-stat-label">Pending Orders</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon admin-stat-icon--red">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="admin-stat-value" id="stat-stock-warn">—</div>
+          <div class="admin-stat-label">Out of Stock / Low Stock</div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h2>Recent Transactions</h2>
+          <button class="admin-btn-link" onclick="switchView('transactions')">View All</button>
+        </div>
+        <div id="dashboard-recent-txns">
+          <p class="empty">Loading...</p>
+        </div>
+      </div>
+
+      <div class="admin-quick-actions">
+        <button class="admin-btn-outline" onclick="switchView('products'); setTimeout(() => openProductModal(), 100)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Product
+        </button>
+        <button class="admin-btn-outline" onclick="switchView('transactions')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          View Transactions
+        </button>
       </div>
     </section>
 
-    <section class="admin-section">
-      <h2>Add Product</h2>
-      <form id="add-form" class="add-form">
-        <input type="text" id="p-name" placeholder="Product name" required>
-        <input type="number" id="p-price" placeholder="Price (ZMW)" step="0.01" required>
-        <input type="number" id="p-stock" placeholder="Stock quantity" min="0" value="0">
-        <select id="p-category">
-          <option value="">— Category —</option>
-          <option value="iPhone">iPhone</option>
-          <option value="Laptop">Laptop</option>
-          <option value="Tablet">Tablet</option>
-          <option value="Accessories">Accessories</option>
-          <option value="Cases">Cases</option>
-        </select>
-        <label class="file-label">Main Image <input type="file" id="p-image" accept="image/*"></label>
-        <div id="p-image-preview" class="image-preview-area"></div>
-        <label class="file-label">Gallery Images <input type="file" id="p-gallery" accept="image/*" multiple></label>
-        <div id="p-gallery-preview" class="image-preview-row"></div>
-        <textarea id="p-desc" placeholder="Description" rows="2"></textarea>
-        <button type="submit" class="btn-primary">Add Product</button>
-      </form>
-    </section>
-
-    <section id="edit-section" class="admin-section" style="display:none"></section>
-
-    <section class="admin-section">
-      <h2>Products</h2>
-      <input type="text" id="product-search" class="admin-search-input" placeholder="Search products by name or category...">
-      <div id="products-list"></div>
-    </section>
-
-    <section class="admin-section">
-      <h2>Transactions</h2>
-      <div class="transaction-filters">
-        <input type="text" id="txn-search" class="admin-search-input" placeholder="Search by customer, phone, or product...">
-        <select id="txn-status-filter" class="admin-filter-select">
-          <option value="">All Statuses</option>
-          <option value="pending">Pending</option>
-          <option value="completed">Completed</option>
-          <option value="failed">Failed</option>
-        </select>
+    <!-- Products view -->
+    <section class="admin-view" id="view-products">
+      <div class="admin-view-header">
+        <h1>Products</h1>
+        <button class="admin-btn-primary" onclick="openProductModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Product
+        </button>
       </div>
-      <div id="payments-list"></div>
+      <div class="admin-card">
+        <input type="text" id="product-search" class="admin-search-input" placeholder="Search products by name or category...">
+        <div id="products-list"></div>
+      </div>
     </section>
+
+    <!-- Transactions view -->
+    <section class="admin-view" id="view-transactions">
+      <div class="admin-view-header">
+        <h1>Transactions</h1>
+      </div>
+      <div class="admin-card">
+        <div class="admin-filters-bar">
+          <input type="text" id="txn-search" class="admin-search-input" placeholder="Search by customer, phone, or product...">
+          <div class="admin-filter-pills" id="txn-status-pills">
+            <button class="admin-pill active" data-status="">All</button>
+            <button class="admin-pill" data-status="pending">Pending</button>
+            <button class="admin-pill" data-status="completed">Completed</button>
+            <button class="admin-pill" data-status="failed">Failed</button>
+          </div>
+        </div>
+        <div id="payments-list"></div>
+      </div>
+    </section>
+
   </main>
+
+  <!-- Product modal -->
+  <div class="admin-modal-overlay" id="product-modal-overlay">
+    <div class="admin-modal">
+      <div class="admin-modal-header">
+        <h2 id="product-modal-title">Add Product</h2>
+        <button class="admin-modal-close" id="product-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <form id="product-form" class="admin-modal-form">
+        <input type="hidden" id="pf-id">
+        <label>
+          Product Name
+          <input type="text" id="pf-name" placeholder="e.g. iPhone 16 Pro" required>
+        </label>
+        <div class="admin-form-row">
+          <label>
+            Price (ZMW)
+            <input type="number" id="pf-price" placeholder="0.00" step="0.01" required>
+          </label>
+          <label>
+            Stock
+            <input type="number" id="pf-stock" placeholder="0" min="0" value="0">
+          </label>
+        </div>
+        <label>
+          Category
+          <select id="pf-category">
+            <option value="">— Select —</option>
+            <option value="iPhone">iPhone</option>
+            <option value="Laptop">Laptop</option>
+            <option value="Tablet">Tablet</option>
+            <option value="Accessories">Accessories</option>
+            <option value="Cases">Cases</option>
+          </select>
+        </label>
+        <label>
+          Description
+          <textarea id="pf-desc" placeholder="Product description..." rows="3"></textarea>
+        </label>
+        <label class="admin-dropzone" id="pf-image-dropzone">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#86868b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Main image — click or drag to upload</span>
+          <input type="file" id="pf-image" accept="image/*" hidden>
+        </label>
+        <div id="pf-image-preview" class="image-preview-area"></div>
+        <label class="admin-dropzone" id="pf-gallery-dropzone">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#86868b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Gallery images — click or drag to upload</span>
+          <input type="file" id="pf-gallery" accept="image/*" multiple hidden>
+        </label>
+        <div id="pf-gallery-preview" class="image-preview-row"></div>
+        <div id="pf-existing-gallery"></div>
+        <div class="admin-modal-actions">
+          <button type="button" class="admin-btn-cancel" id="product-modal-cancel">Cancel</button>
+          <button type="submit" class="admin-btn-primary" id="product-modal-submit">Add Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script src="admin.js"></script>
 </body>
