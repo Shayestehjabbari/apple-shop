@@ -90,6 +90,7 @@ router.post('/pay', async (req, res) => {
         amount: Number(product.price).toFixed(2),
         country: 'ZMB',
         reason: `Purchase: ${product.name} — ${customer.name}`,
+        language: 'EN',
       }),
     });
 
