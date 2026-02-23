@@ -66,17 +66,34 @@ db.exec(`
   );
 `);
 
-// Seed products if table is empty
+// Seed products
+const OLD_SEED_COUNT = 2;
 const count = db.prepare('SELECT COUNT(*) as cnt FROM products').get();
-if (count.cnt === 0) {
+
+const products = [
+  ['iPhone 17', 18999, '/images/iphone17.png', 'A19 chip. 48MP Fusion camera. Ceramic Shield front. Available in five stunning colors.', 10, 'iPhone'],
+  ['iPhone 17 Pro Max', 27999, '/images/iphone17promax.png', 'A19 Pro chip. 48MP camera system. Titanium design. The most powerful iPhone ever.', 5, 'iPhone'],
+  ['iPhone 16', 16499, '/images/iphone16.svg', 'A18 chip. 48MP camera. Action button. Sleek design in six vibrant colors.', 15, 'iPhone'],
+  ['iPhone 16 Pro', 19999, '/images/iphone16pro.svg', 'A18 Pro chip. 48MP camera system. Titanium design. Pro-level performance.', 8, 'iPhone'],
+  ['iPhone 15', 13999, '/images/iphone15.svg', 'A16 Bionic chip. 48MP camera. Dynamic Island. USB-C connectivity.', 20, 'iPhone'],
+  ['iPhone 15 Pro', 17499, '/images/iphone15pro.svg', 'A17 Pro chip. Titanium frame. 48MP main camera. Lightweight and powerful.', 10, 'iPhone'],
+  ['iPhone SE', 8999, '/images/iphonese.svg', 'A15 Bionic chip. 4.7-inch Retina display. Touch ID. The most affordable iPhone.', 25, 'iPhone'],
+  ['AirPods Pro 2', 4999, '/images/airpodspro2.svg', 'Active Noise Cancellation. Adaptive Audio. USB-C charging case. Up to 6 hours listening.', 30, 'Accessories'],
+  ['AirPods Max', 10999, '/images/airpodsmax.svg', 'High-fidelity audio. Active Noise Cancellation. 20 hours battery. Premium over-ear design.', 10, 'Accessories'],
+  ['MagSafe Charger', 899, '/images/magsafe.svg', 'Perfectly aligned wireless charging for iPhone. Snaps magnetically into place.', 50, 'Accessories'],
+  ['iPhone Silicone Case', 599, '/images/siliconecase.svg', 'Soft-touch silicone exterior. MagSafe compatible. Protects your iPhone in style.', 40, 'Accessories'],
+  ['Apple 20W USB-C Adapter', 499, '/images/usbc-adapter.svg', 'Fast charging power adapter. USB-C connector. Compatible with any USB-C cable.', 60, 'Accessories'],
+];
+
+if (count.cnt === 0 || count.cnt === OLD_SEED_COUNT) {
+  if (count.cnt === OLD_SEED_COUNT) {
+    db.exec('DELETE FROM product_images');
+    db.exec('DELETE FROM products');
+  }
+
   const insert = db.prepare(
     'INSERT INTO products (name, price, image, description, stock, category) VALUES (?, ?, ?, ?, ?, ?)'
   );
-
-  const products = [
-    ['iPhone 17', 18999, '/images/iphone17.png', 'A19 chip. 48MP Fusion camera. Ceramic Shield front. Available in five stunning colors.', 10, 'iPhone'],
-    ['iPhone 17 Pro Max', 27999, '/images/iphone17promax.png', 'A19 Pro chip. 48MP camera system. Titanium design. The most powerful iPhone ever.', 5, 'iPhone'],
-  ];
 
   const insertMany = db.transaction((items) => {
     for (const item of items) {

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="16" fill="#1d1d1f"/>
+  <text x="100" y="90" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="18" font-weight="600" fill="#d4af37">iPhone 15 Pro</text>
+  <text x="100" y="115" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="13" fill="#d4af37" opacity="0.6">A17 Pro Chip</text>
+</svg>
