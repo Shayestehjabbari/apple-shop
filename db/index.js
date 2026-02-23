@@ -67,7 +67,7 @@ db.exec(`
 `);
 
 // Seed products
-const OLD_SEED_COUNT = 2;
+const SEED_COUNT = 12;
 const count = db.prepare('SELECT COUNT(*) as cnt FROM products').get();
 
 const products = [
@@ -85,10 +85,11 @@ const products = [
   ['Apple 20W USB-C Adapter', 499, '/images/usbc-adapter.svg', 'Fast charging power adapter. USB-C connector. Compatible with any USB-C cable.', 60, 'Accessories'],
 ];
 
-if (count.cnt === 0 || count.cnt === OLD_SEED_COUNT) {
-  if (count.cnt === OLD_SEED_COUNT) {
+if (count.cnt === 0 || count.cnt === SEED_COUNT) {
+  if (count.cnt > 0) {
     db.exec('DELETE FROM product_images');
     db.exec('DELETE FROM products');
+    db.exec("DELETE FROM sqlite_sequence WHERE name='products'");
   }
 
   const insert = db.prepare(
