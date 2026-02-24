@@ -221,7 +221,7 @@ function setupImagePreview(inputId, previewId) {
 }
 
 // --- Product modal ---
-const modalOverlay = document.getElementById('product-modal-overlay');
+const modalDialog = document.getElementById('product-modal');
 const modalTitle = document.getElementById('product-modal-title');
 const modalSubmit = document.getElementById('product-modal-submit');
 const productForm = document.getElementById('product-form');
@@ -245,7 +245,7 @@ function openProductModal(product) {
     modalSubmit.textContent = 'Add Product';
   }
 
-  modalOverlay.classList.add('open');
+  modalDialog.showModal();
   setupImagePreview('pf-image', 'pf-image-preview');
   setupImagePreview('pf-gallery', 'pf-gallery-preview');
 }
@@ -293,13 +293,13 @@ async function fetchAndFillProduct(id) {
 }
 
 function closeProductModal() {
-  modalOverlay.classList.remove('open');
+  modalDialog.close();
 }
 
 document.getElementById('product-modal-close').addEventListener('click', closeProductModal);
 document.getElementById('product-modal-cancel').addEventListener('click', closeProductModal);
-modalOverlay.addEventListener('click', (e) => {
-  if (e.target === modalOverlay) closeProductModal();
+modalDialog.addEventListener('click', (e) => {
+  if (e.target === modalDialog) closeProductModal();
 });
 
 // Form submit — handles both add and edit

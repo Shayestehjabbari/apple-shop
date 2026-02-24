@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout — iPhone Zambia</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -52,7 +53,7 @@
       document.title = `Checkout: ${product.name} — iPhone Zambia`;
 
       document.getElementById('checkout-content').innerHTML = `
-        <div class="checkout-card">
+        <article class="checkout-card">
           <div class="checkout-summary">
             <img src="${esc(product.image)}" alt="${esc(product.name)}" onerror="this.style.display='none'">
             <div>
@@ -106,7 +107,7 @@
             </label>
             <button type="submit" id="pay-btn" class="buy-btn">Proceed to Payment</button>
           </form>
-        </div>
+        </article>
       `;
 
       document.getElementById('checkout-form').onsubmit = async (e) => {

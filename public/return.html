@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Payment — iPhone Zambia</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -21,14 +22,14 @@
   </header>
 
   <main class="return-page sf-fade-in">
-    <div class="return-card" id="return-card">
+    <article class="return-card" id="return-card">
       <h1>Thank you for your purchase!</h1>
       <p>Your payment is being processed.</p>
-      <button class="btn-primary" id="check-status-btn" onclick="checkStatus()">Check Payment Status</button>
+      <button role="button" id="check-status-btn" onclick="checkStatus()">Check Payment Status</button>
       <div style="margin-top: 16px;">
         <a href="/" class="back-link">Back to Shop</a>
       </div>
-    </div>
+    </article>
   </main>
 
   <script>
@@ -73,21 +74,21 @@
           <div class="status-icon status-icon-success">&#10003;</div>
           <h1 class="status-icon-success">Purchase Completed!</h1>
           <p>Your payment has been received successfully. Thank you for shopping with us!</p>
-          <a href="/" class="btn-primary">Back to Shop</a>
+          <a href="/" role="button">Back to Shop</a>
         `;
       } else if (status === 'failed') {
         card.innerHTML = `
           <div class="status-icon status-icon-failed">&#10007;</div>
           <h1 class="status-icon-failed">Payment Failed</h1>
           <p>Unfortunately your payment could not be processed. Please try again or contact support.</p>
-          <a href="/" class="btn-primary">Back to Shop</a>
+          <a href="/" role="button">Back to Shop</a>
         `;
       } else {
         card.innerHTML = `
           <div class="status-icon status-icon-pending">&#8987;</div>
           <h1 class="status-icon-pending">Payment Pending</h1>
           <p>Your payment is still being processed. Please check back in a few moments.</p>
-          <button class="btn-primary" onclick="checkStatus()">Check Again</button>
+          <button role="button" onclick="checkStatus()">Check Again</button>
           <div style="margin-top: 16px;">
             <a href="/" class="back-link">Back to Shop</a>
           </div>

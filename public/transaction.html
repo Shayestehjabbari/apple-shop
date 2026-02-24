@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Transaction — iPhone Zambia</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -21,9 +22,9 @@
   </header>
 
   <main class="return-page sf-fade-in" id="txn-page">
-    <div class="return-card" id="txn-card">
+    <article class="return-card" id="txn-card">
       <p>Loading...</p>
-    </div>
+    </article>
   </main>
 
   <script>
@@ -70,7 +71,7 @@
         : '';
 
       const checkBtn = t.status === 'pending'
-        ? `<button class="btn-primary" id="check-status-btn" style="margin-top: 20px;">Check Status</button>`
+        ? `<button role="button" id="check-status-btn" style="margin-top: 20px;">Check Status</button>`
         : '';
 
       document.getElementById('txn-card').innerHTML = `

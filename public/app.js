@@ -66,9 +66,10 @@ function renderProducts(products) {
   }
 
   for (const p of products) {
-    const card = document.createElement('a');
+    const card = document.createElement('article');
     card.className = 'product-card';
-    card.href = `/product.html?id=${p.id}`;
+    card.style.cursor = 'pointer';
+    card.onclick = () => { window.location.href = `/product.html?id=${p.id}`; };
 
     const stockClass = p.stock > 0 ? 'stock-available' : 'stock-out';
     const stockText = p.stock > 0 ? `${p.stock} in stock` : 'Out of Stock';

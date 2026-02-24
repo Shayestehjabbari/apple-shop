@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — iPhone Zambia</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="admin-body">
@@ -150,8 +151,8 @@
   </main>
 
   <!-- Product modal -->
-  <div class="admin-modal-overlay" id="product-modal-overlay">
-    <div class="admin-modal">
+  <dialog id="product-modal">
+    <article>
       <div class="admin-modal-header">
         <h2 id="product-modal-title">Add Product</h2>
         <button class="admin-modal-close" id="product-modal-close" aria-label="Close">&times;</button>
@@ -205,8 +206,8 @@
           <button type="submit" class="admin-btn-primary" id="product-modal-submit">Add Product</button>
         </div>
       </form>
-    </div>
-  </div>
+    </article>
+  </dialog>
 
   <script src="admin.js"></script>
 </body>
