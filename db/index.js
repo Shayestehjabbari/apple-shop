@@ -46,6 +46,11 @@ for (const col of newCols) {
   }
 }
 
+// Migration: add failReason column to payments table
+if (!cols.includes('failReason')) {
+  db.exec("ALTER TABLE payments ADD COLUMN failReason TEXT DEFAULT ''");
+}
+
 // Migration: add stock column to products table
 const productCols = db.prepare("PRAGMA table_info(products)").all().map(c => c.name);
 if (!productCols.includes('stock')) {
