@@ -146,11 +146,14 @@ router.get('/payments/:depositId/status', async (req, res) => {
         IN_RECONCILIATION: 'pending',
       };
       const mappedStatus = statusMap[data.data.status] || 'pending';
-      db.prepare('UPDATE payments SET status = ? WHERE depositId = ?').run(mappedStatus, depositId);
+      const reason = mappedStatus === 'failed' ? (data.data.failureReason || 'Payment failed') : '';
+      db.prepare('UPDATE payments SET status = ?, failReason = ? WHERE depositId = ?').run(mappedStatus, reason, depositId);
 
-      res.json({ success: true, status: mappedStatus, pawapayStatus: data.data.status });
+      res.json({ success: true, status: mappedStatus, pawapayStatus: data.data.status, failReason: reason });
     } else {
-      res.status(404).json({ success: false, error: 'Deposit not found' });
+      const reason = 'Customer opened payment page but did not complete the payment';
+      db.prepare('UPDATE payments SET status = ?, failReason = ? WHERE depositId = ?').run('failed', reason, depositId);
+      res.json({ success: true, status: 'failed', pawapayStatus: 'NOT_FOUND', failReason: reason });
     }
   } catch (err) {
     res.status(500).json({ success: false, error: 'Could not check payment status' });

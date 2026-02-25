@@ -77,6 +77,7 @@
       document.getElementById('txn-card').innerHTML = `
         <div class="status-icon status-icon-${statusKey}">${statusIcons[t.status] || statusIcons.pending}</div>
         <span class="status-badge status-${esc(t.status)}" style="font-size: 14px; padding: 4px 16px;">${esc(t.status)}</span>
+        ${t.failReason ? `<p style="color:#e91e63;margin-top:8px;font-size:14px;">${esc(t.failReason)}</p>` : ''}
 
         <div class="txn-order-info">
           ${thumbHtml}
